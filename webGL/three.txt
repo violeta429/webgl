@@ -1,0 +1,91 @@
+new THREE.PerspectiveCamera
+fov : 시야각 - 카메라가 관찰하는 영역의 너비 
+더 큰값은 더 넓은 시야각을 의미
+aspect : 뷰포트 가로너비와 세로높이의 비율 
+           일반적으로 width / height 로 계산
+near : 카메라에서 가까운 면의 클리핑 평면을 나타내는 값
+이 평면 이전에 있는 객체는 렌더링 되지않음
+far : 카메라에서 먼 면의 클리핑 평면을 나타내는 값
+
+
+
+import * as THREE from 'three';
+
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+
+
+// Three.js 초기화
+const canvas = document.getElementById('scene');
+const renderer = new THREE.WebGLRenderer({ canvas });
+const camera = new THREE.PerspectiveCamera(500, 800 / 1000, 1, 1000);
+const scene = new THREE.Scene();
+let Mesh;
+let light;
+let light_sun;
+
+
+function init() {
+    scene.background = new THREE.Color('black');
+    camera.position.set(5, 14, 18);
+    camera.lookAt( 0.5, 10, 16 );
+}
+
+function setLight() {
+    light = new THREE.AmbientLight(0xffffff); // soft white light
+    scene.add(light);
+    
+    light_sun = new THREE.DirectionalLight ( 0x808080, 1.0 );
+      var shadowBlur=10;
+      light_sun.castShadow=true;
+      light_sun.shadow.camera.left=-shadowBlur;
+      light_sun.shadow.camera.right=shadowBlur;
+      light_sun.shadow.camera.top=shadowBlur;
+      light_sun.shadow.camera.bottom=-shadowBlur;
+      scene.add( light_sun );
+}
+
+// GLTF 로더 생성
+const loader = new GLTFLoader();
+
+// GLTF 파일 로드
+loader.load(
+  'src/object/test.glb',
+  function (gltf) {
+    // 로드된 GLTF 파일의 콘텐츠를 씬에 추가
+    const object = gltf.scene;
+    scene.add(object);
+  },
+  function (xhr) {
+    // 로딩 진행 상태를 표시할 콜백 함수
+    console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
+  },
+  function (error) {
+    // 로드 중에 오류가 발생하면 실행될 콜백 함수
+    console.error('Error loading GLTF file:', error);
+  }
+);
+
+function animate() {
+    requestAnimationFrame(animate);
+    if (Mesh && Mesh.rotation) {
+        Mesh.rotation.y -= 0.001;
+    }
+    
+    // 카메라 컨트롤러 추가
+    //let controls = new THREE.OrbitControls (camera, renderer.domElement);
+    //controls.update();
+  
+    renderer.render(scene, camera);
+}
+
+
+
+
+
+
+
+init();
+setLight();
+animate();
